@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "TankPlayerController.h"
 #include "BattleTank.h"
+#include "Tank.h"
+
+
 
 
 ATankPlayerController::ATankPlayerController()
@@ -107,20 +109,3 @@ bool ATankPlayerController::GetLookVectorHitLocation(FVector& OutHitLocation, FV
 	}
 	
 }
-/*
-FHitResult ATankPlayerController::GetFirstPhysicsBodyInReach()
-{
-	///Setup query params
-	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
-	FHitResult HitResult;
-	GetWorld()->LineTraceSingleByObjectType(
-		OUT HitResult,
-		GetLineTraceStart(),
-		GetLineTraceEnd(),
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-		TraceParameters
-	);
-	return HitResult;
-}
-
-*/
