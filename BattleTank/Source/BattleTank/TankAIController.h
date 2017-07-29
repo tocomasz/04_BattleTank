@@ -7,16 +7,26 @@
 #include "AIController.h"
 #include "TankAIController.generated.h"
 
+
+
 class ATank;
 
 UCLASS()
 class BATTLETANK_API ATankAIController : public AAIController
 {
 	GENERATED_BODY()
+
+protected:
+
+
 private:
 	ATankAIController();
 	
 	void BeginPlay() override;
-	void Tick(float DeltaTime) override;	
+	void Tick(float DeltaTime) override;
+
+
+	//how close AI to the player
+	float AcceptanceRadius = 3000;
 	
 };
