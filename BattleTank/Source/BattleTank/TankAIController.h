@@ -7,9 +7,7 @@
 #include "AIController.h"
 #include "TankAIController.generated.h"
 
-
-
-class ATank;
+class UTankAimingComponent;
 
 UCLASS()
 class BATTLETANK_API ATankAIController : public AAIController
@@ -18,9 +16,18 @@ class BATTLETANK_API ATankAIController : public AAIController
 
 protected:
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Setup")
+	void FoundAimingComponent(UTankAimingComponent* AimingCompRef);
+
+
+	UPROPERTY(BlueprintReadOnly)
+	UTankAimingComponent* AimingComponent = nullptr;
 
 private:
 	ATankAIController();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Firing")
+	float LaunchSpeed = 4000;
 	
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;

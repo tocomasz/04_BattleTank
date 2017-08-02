@@ -2,7 +2,7 @@
 
 #include "TankPlayerController.h"
 #include "BattleTank.h"
-#include "Tank.h"
+#include "TankAimingComponent.h"
 
 
 
@@ -11,11 +11,17 @@ ATankPlayerController::ATankPlayerController()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 }
 
 void ATankPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+	if (!ensure(AimingComponent)) { return; }
+	FoundAimingComponent(AimingComponent);
+
 }
 void ATankPlayerController::Tick(float DeltaTime)
 {
@@ -23,22 +29,15 @@ void ATankPlayerController::Tick(float DeltaTime)
 	AimTowardsCrosshair();
 }
 
-
-
-ATank* ATankPlayerController::GetControlledTank() const
-{
-	return Cast<ATank>(GetPawn());
-}
-
-
 void ATankPlayerController::AimTowardsCrosshair()
 {
-	if (!GetControlledTank()) { return; }
+	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+	if (!ensure(AimingComponent)) { return; }
 
 	FVector HitLocation; // Out parameter
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		GetControlledTank()->AimAt(HitLocation);
+		AimingComponent->AimAt(HitLocation);
 	}
 }
 

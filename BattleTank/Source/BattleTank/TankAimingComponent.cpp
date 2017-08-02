@@ -4,9 +4,35 @@
 #include "BattleTank.h"
 #include "TankBarrel.h"
 #include "TankTurret.h"
+#include "Projectile.h"
 
 
+UTankAimingComponent::UTankAimingComponent()
+{
+	bWantsBeginPlay = true;
+	PrimaryComponentTick.bCanEverTick = true;
+}
 
+void UTankAimingComponent::BeginPlay()
+{
+	LastFireTime = FPlatformTime::Seconds();
+}
+
+void UTankAimingComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	if ((FPlatformTime::Seconds() - LastFireTime) < ReloadTimeInSeconds)
+	{
+		FiringStatus = EFiringStatus::Reloading;
+	}
+	else if (IsBarrelMoving())
+	{
+		FiringStatus = EFiringStatus::Aiming;
+	}
+	else
+	{
+		FiringStatus = EFiringStatus::Locked;
+	}
+}
 
 void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTankTurret* TurretToSet)
 {
@@ -14,11 +40,9 @@ void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTankTurret* Tur
 	Turret = TurretToSet;
 }
 
-
-void UTankAimingComponent::AimAt(FVector HitLocation, float LaunchSpeed)
+void UTankAimingComponent::AimAt(FVector HitLocation)
 {
-	if (!Barrel) { return; }
-	if (!Turret) { return; }
+	if (!ensure(Barrel)) { return; }
 
 	FVector OutLaunchVelocity;
 	FVector StartLocation = Barrel->GetSocketLocation(FName("Projectile"));
@@ -37,7 +61,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation, float LaunchSpeed)
 	);
 		if (bHaveAimSolution)
 		{
-			auto AimDirection = OutLaunchVelocity.GetSafeNormal();
+			AimDirection = OutLaunchVelocity.GetSafeNormal();
 			MoveBarrelTowards(AimDirection);
 
 		}
@@ -45,6 +69,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation, float LaunchSpeed)
 
 void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 {
+	if (!ensure(Barrel && Turret)) { return; }
 	//diference etween current barrel rotation and aimdirection
 	auto BarrelRotator = Barrel->GetForwardVector().Rotation();
 	auto AimAsRotator = AimDirection.Rotation();
@@ -55,4 +80,27 @@ void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 	Turret->Rotate(DeltaRotator.Yaw);
 	
 	//
+}
+
+bool UTankAimingComponent::IsBarrelMoving()
+{
+	if (!ensure (Barrel)) { return false; }
+	return !(Barrel->GetForwardVector().Equals(AimDirection,0.1));
+}
+
+void UTankAimingComponent::Fire()
+{
+
+
+	if (FiringStatus != EFiringStatus::Reloading) {
+		if (!ensure (Barrel)) { return; }
+		if (!ensure (ProjectileBluePrint)) { return; }
+		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
+			ProjectileBluePrint,
+			Barrel->GetSocketLocation(FName("Projectile")),
+			Barrel->GetSocketRotation(FName("Projectile"))
+			);
+		Projectile->LaunchProjectile(LaunchSpeed);
+		LastFireTime = FPlatformTime::Seconds();
+	}
 }
