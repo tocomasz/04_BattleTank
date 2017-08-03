@@ -9,7 +9,7 @@
 
 UTankAimingComponent::UTankAimingComponent()
 {
-	bWantsBeginPlay = true;
+
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
@@ -20,17 +20,23 @@ void UTankAimingComponent::BeginPlay()
 
 void UTankAimingComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
-	if ((FPlatformTime::Seconds() - LastFireTime) < ReloadTimeInSeconds)
+	if (RoundsLeft > 0)
 	{
-		FiringStatus = EFiringStatus::Reloading;
+		if ((FPlatformTime::Seconds() - LastFireTime) < ReloadTimeInSeconds)
+		{
+			FiringStatus = EFiringStatus::Reloading;
+		}
+		else if (IsBarrelMoving())
+		{
+			FiringStatus = EFiringStatus::Aiming;
+		}
+		else
+		{
+			FiringStatus = EFiringStatus::Locked;
+		}
 	}
-	else if (IsBarrelMoving())
-	{
-		FiringStatus = EFiringStatus::Aiming;
-	}
-	else
-	{
-		FiringStatus = EFiringStatus::Locked;
+	else {
+		FiringStatus = EFiringStatus::NoAmmo;
 	}
 }
 
@@ -76,8 +82,11 @@ void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 	auto DeltaRotator = AimAsRotator - BarrelRotator;
 
 	//move the barrel the right amount this frame
+	
+	
 	Barrel->Elevate(DeltaRotator.Pitch); 
-	Turret->Rotate(DeltaRotator.Yaw);
+	if (FMath::Abs(DeltaRotator.Yaw) < 180) { Turret->Rotate(DeltaRotator.Yaw); }
+	else { Turret->Rotate(-DeltaRotator.Yaw); }
 	
 	//
 }
@@ -91,10 +100,10 @@ bool UTankAimingComponent::IsBarrelMoving()
 void UTankAimingComponent::Fire()
 {
 
-
-	if (FiringStatus != EFiringStatus::Reloading) {
-		if (!ensure (Barrel)) { return; }
-		if (!ensure (ProjectileBluePrint)) { return; }
+	
+	if (FiringStatus == EFiringStatus::Locked && FiringStatus == EFiringStatus::Aiming) {
+		if (!ensure(Barrel)) { return; }
+		if (!ensure(ProjectileBluePrint)) { return; }
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileBluePrint,
 			Barrel->GetSocketLocation(FName("Projectile")),
@@ -102,5 +111,16 @@ void UTankAimingComponent::Fire()
 			);
 		Projectile->LaunchProjectile(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
+		RoundsLeft--;
 	}
+}
+
+EFiringStatus UTankAimingComponent::GetFiringStatus() const
+{
+	return FiringStatus;
+}
+
+int UTankAimingComponent::GetRoundsLeft() const
+{
+	return RoundsLeft;
 }

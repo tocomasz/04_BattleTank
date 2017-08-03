@@ -23,17 +23,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	UTankAimingComponent* AimingComponent = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+	float AcceptanceRadius = 80000;
+
 private:
 	ATankAIController();
-
-	UPROPERTY(EditDefaultsOnly, Category = "Firing")
-	float LaunchSpeed = 4000;
 	
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 
 
-	//how close AI to the player
-	float AcceptanceRadius = 3000;
+
 	
 };
