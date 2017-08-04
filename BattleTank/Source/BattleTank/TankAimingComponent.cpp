@@ -98,10 +98,8 @@ bool UTankAimingComponent::IsBarrelMoving()
 }
 
 void UTankAimingComponent::Fire()
-{
-
-	
-	if (FiringStatus == EFiringStatus::Locked && FiringStatus == EFiringStatus::Aiming) {
+{	
+	if (FiringStatus == EFiringStatus::Locked || FiringStatus == EFiringStatus::Aiming) {
 		if (!ensure(Barrel)) { return; }
 		if (!ensure(ProjectileBluePrint)) { return; }
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(

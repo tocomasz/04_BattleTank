@@ -44,8 +44,6 @@
 *.VC.db
 *.VC.opendb
 
-Content/StarterContent/Textures
-Content/StarterContent/HDRI
 
 # Precompiled Assets
 SourceArt/**/*.png
