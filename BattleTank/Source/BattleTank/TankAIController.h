@@ -28,9 +28,14 @@ protected:
 
 private:
 	ATankAIController();
+
+	virtual void SetPawn(APawn* InPawn) override;
 	
 	void BeginPlay() override;
-	void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+		void OnPossessedTankDeath();
 
 
 
