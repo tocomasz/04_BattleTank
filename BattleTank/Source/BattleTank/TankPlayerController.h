@@ -24,12 +24,20 @@ protected:
 public:
 
 	ATankPlayerController();
+
+
+
 	
 	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 private:
+
+	UFUNCTION()
+	void OnPossessedTankDeath();
+
+	virtual void SetPawn(APawn* InPawn) override;
 
 	//Start the tank moving the barrel
 	void AimTowardsCrosshair();
